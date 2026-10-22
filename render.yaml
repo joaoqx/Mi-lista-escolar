@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mi-lista-escolar
+    runtime: docker
+    healthCheckPath: /api/health
+    envVars:
+      - key: BRIGHTDATA_API_KEY
+        sync: false
+      - key: BRIGHTDATA_SERP_ZONE
+        sync: false

@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi Lista Escolar</title>
+<meta name="theme-color" content="#e8efec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lista Escolar">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --line:#e6e9f2;
+  --text:#1c2340;
+  --muted:#6f7896;
+  --accent:#4f6ef7;
+  --accent-soft:#eef2ff;
+  --ok:#1fa971;
+  --warn:#ffb84d;
+  --done:#eefaf4;
+  --shadow:0 10px 30px rgba(27,39,94,.06);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,#f8f9fd 0%, #f3f5fb 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit}
+button{border:0;cursor:pointer}
+body{padding:16px 16px 40px}
+.app{max-width:980px;margin:0 auto}
+.hero{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:13px;width:max-content;box-shadow:var(--shadow)}
+.title{font-size:clamp(30px,5vw,52px);font-weight:900;letter-spacing:-.04em;line-height:.95;margin:0}
+.title span{color:var(--accent)}
+.subtitle{margin:0;color:var(--muted);font-size:16px;max-width:620px;line-height:1.45}
+.grid{display:grid;gap:14px}
+.top-grid{grid-template-columns:1.3fr .9fr}
+.card{background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border:1px solid rgba(230,233,242,.9);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card h2,.card h3{margin:0 0 6px 0;letter-spacing:-.02em}
+.muted{color:var(--muted)}
+.progress-wrap{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:8px}
+.ring{width:94px;height:94px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--value,0)*1%), #e9edf8 0)}
+.ring::before{content:"";width:72px;height:72px;border-radius:50%;background:white;display:block;box-shadow:inset 0 0 0 1px var(--line)}
+.ring-label{position:absolute;font-weight:800;font-size:20px}
+.ring-box{position:relative;display:grid;place-items:center;min-width:94px}
+.meter{height:10px;border-radius:999px;background:#edf1fb;overflow:hidden;margin-top:10px}
+.meter > div{height:100%;width:0;background:linear-gradient(90deg,#5d79ff,#76b8ff);transition:width .22s ease}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.stat{background:#f8f9fd;border:1px solid var(--line);border-radius:18px;padding:14px}
+.stat .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat .value{font-size:28px;font-weight:850;letter-spacing:-.04em}
+.stack{display:flex;flex-wrap:wrap;gap:10px}
+.action{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:16px;background:#fff;border:1px solid var(--line);color:var(--text);font-weight:650;min-height:48px;box-shadow:var(--shadow)}
+.action.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.action.soft{background:var(--accent-soft);color:#364ec4;border-color:#dfe5ff}
+.action.small{padding:10px 12px;border-radius:14px;min-height:auto;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.input,.select,.textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px 15px;color:var(--text);outline:none}
+.input:focus,.select:focus,.textarea:focus{border-color:#cfd8ff;box-shadow:0 0 0 4px rgba(79,110,247,.1)}
+.small{font-size:13px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.section-title{font-size:21px;font-weight:800;letter-spacing:-.03em}
+.list-name{font-size:15px;font-weight:700;border-radius:18px}
+.shop-list{display:flex;flex-wrap:wrap;gap:10px}
+.shop-pill{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;min-height:44px}
+.shop-pill input{accent-color:var(--accent)}
+.icon-btn{width:34px;height:34px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#697391;display:grid;place-items:center}
+.icon-btn:hover{background:#f5f7fd}
+.empty{padding:18px;border-radius:18px;background:#f8f9fd;border:1px dashed #dbe0ee;color:var(--muted);text-align:center}
+.items{display:grid;gap:12px}
+.item-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+.item-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.item-name{font-weight:800;font-size:18px;letter-spacing:-.02em;margin:0}
+.item-sub{color:var(--muted);font-size:13px;margin-top:4px}
+.tag-state{padding:8px 10px;border-radius:999px;font-weight:700;font-size:12px;border:1px solid transparent;white-space:nowrap}
+.state-pending{background:#fff7e9;color:#9b6712;border-color:#f5ddab}
+.state-have{background:#eef8ff;color:#14567c;border-color:#cfe8fb}
+.state-bought{background:#eefaf4;color:#16744f;border-color:#cdeedc}
+.item-controls{display:grid;grid-template-columns:130px 1fr auto;gap:10px;margin-top:14px}
+.price-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.price-card{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fafbff}
+.price-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.price-name{font-weight:700;font-size:14px}
+.best{font-size:11px;font-weight:800;color:var(--ok)}
+.price-fields{display:grid;grid-template-columns:100px 1fr;gap:8px}
+.link-btn{display:inline-flex;align-items:center;gap:6px;color:#4a63d9;text-decoration:none;font-weight:650;font-size:13px;margin-top:8px}
+.item-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.helper{font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+.modal-bg{position:fixed;inset:0;background:rgba(17,22,43,.4);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:50}
+.modal{width:min(720px,100%);background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:26px;padding:18px;max-height:90vh;overflow:auto}
+.modal-title{font-size:22px;font-weight:850;letter-spacing:-.03em;margin:0 0 8px}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+hr.sep{border:0;border-top:1px solid var(--line);margin:14px 0}
+footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+@media (max-width:780px){
+  .top-grid{grid-template-columns:1fr}
+  .item-controls{grid-template-columns:1fr 1fr}
+  .item-controls > *:last-child{grid-column:1/-1}
+  .price-grid{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  body{padding:12px 12px 28px}
+  .card{padding:16px}
+  .stats{grid-template-columns:1fr 1fr}
+  .progress-wrap{align-items:flex-start}
+  .item-top{flex-direction:column}
+  .item-controls{grid-template-columns:1fr}
+  .section-head{flex-direction:column;align-items:stretch}
+  .row .input{min-width:0}
+}
+
+/* Vista lista compacta — mantiene todas las funciones del motor familiar */
+:root{--bg:#e9eee9;--card:#f4f5ef;--line:#d7dfd7;--text:#21302d;--muted:#65796f;--accent:#36665f;--accent-soft:#e4efe9;--shadow:none;--radius:18px}
+html,body{background:#e9eee9}
+.card{background:#f5f6f0;backdrop-filter:none;box-shadow:none}
+.shop-pill{background:#eaf0e9}.action.primary{background:#36665f;border-color:#36665f}.action.soft{color:#36665f;background:#e3ede6;border-color:#cee0d2}
+.meter>div{background:#4c9980}.ring{background:conic-gradient(#4c9980 calc(var(--value,0)*1%), #dce8df 0)}
+#itemsWrap{display:block;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#f9faf6}
+.item-card{border:0;border-bottom:1px solid #d9e2d9;border-radius:0;background:transparent;box-shadow:none;padding:0}.item-card:last-child{border-bottom:0}
+.compact-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto 25px;gap:10px;align-items:center;padding:12px 13px;min-height:63px}
+.compact-check{width:22px;height:22px;accent-color:#367866}.compact-title{font-size:14px;font-weight:720;line-height:1.4;overflow-wrap:anywhere}.compact-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.compact-cost{font-size:13px;font-weight:750;color:#326d55;white-space:nowrap}
+.compact-detail{display:none;padding:12px 15px 16px;border-top:1px solid var(--line);background:#eff3ec}.item-card.expanded .compact-detail{display:block}
+.compact-expand{background:transparent;color:#667e6f;font-size:17px;padding:6px;cursor:pointer}
+.compact-details-grid{display:grid;grid-template-columns:1fr 90px;gap:9px;margin:9px 0 13px}
+.shop-price-line{display:grid;grid-template-columns:minmax(115px,1fr) 90px minmax(0,1fr) 28px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #dfe6dc}
+.shop-logo{height:23px;width:23px;object-fit:contain;border-radius:5px;vertical-align:middle;background:white;border:1px solid #e5e8e0}
+.shop-symbol{display:inline-flex;width:23px;height:23px;align-items:center;justify-content:center;background:#dce8da;color:#305c52;border-radius:6px;font-size:12px;font-weight:800;vertical-align:middle}
+.shop-identity{display:flex;gap:7px;align-items:center;min-width:0}.shop-identity span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.compact-input{padding:8px 9px;border-radius:9px;min-width:0}.compact-link{font-size:13px;text-decoration:none;color:#36665f}
+@media(max-width:600px){.shop-price-line{grid-template-columns:minmax(80px,1fr) 82px minmax(0,1fr) 22px;gap:5px}.shop-price-line .input{font-size:12px}.compact-row{padding:10px 8px;gap:7px}.compact-cost{font-size:12px}.compact-title{font-size:13px}.compact-detail{padding:10px}.compact-details-grid{grid-template-columns:1fr 75px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <span class="badge">🎒 Lista escolar simple · visual · hecha para celular</span>
+    <h1 class="title">Mi <span>Lista Escolar</span></h1>
+    <p class="subtitle">Organiza tus útiles, compara precios por tienda y marca lo que ya tienes. Todos tus útiles en una sola lista. Despliega un producto para comparar precios.</p>
+  </section>
+
+  <section class="card" style="margin-bottom:14px;background:#f1f3f1">
+    <div class="section-head"><div><div class="section-title">Mis hijos y listas</div><div class="muted small">Cada hijo conserva sus útiles y su avance. Puedes crear una lista por año.</div></div><button class="action primary small" id="addChildList">+ Añadir hijo o lista</button></div>
+    <div id="familyTabs" class="shop-list"></div>
+    <div class="row" style="margin-top:12px"><button class="action small" id="familySummary">Ver compra familiar</button><button class="action small" id="sharePrices">Compartir mis precios</button><label class="action small" style="cursor:pointer">Importar precios familiares<input type="file" id="importPrices" accept=".json,application/json" class="hidden"></label></div>
+    <div id="familyResults" class="hidden" style="margin-top:14px"></div>
+  </section>
+  <div class="grid top-grid">
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Tu progreso</div>
+          <div class="muted small">Lo que ya tienes o ya compraste cuenta como completado.</div>
+        </div>
+        <input id="listName" class="input list-name" placeholder="Ej.: Lista de Mateo · 4° primaria" />
+      </div>
+      <div class="progress-wrap">
+        <div class="ring-box">
+          <div class="ring" id="ring"></div>
+          <div class="ring-label" id="pct">0%</div>
+        </div>
+        <div style="flex:1">
+          <div class="stats">
+            <div class="stat"><div class="label">Completados</div><div class="value" id="doneCount">0/0</div></div>
+            <div class="stat"><div class="label">Falta conseguir</div><div class="value" id="remaining">S/ 0.00</div></div>
+            <div class="stat"><div class="label">Valor estimado</div><div class="value" id="total">S/ 0.00</div></div>
+            <div class="stat"><div class="label">Tiendas activas</div><div class="value" id="shopsCount">0</div></div>
+          </div>
+          <div class="meter"><div id="meterFill"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Acciones rápidas</div>
+          <div class="muted small">Todo lo importante, en una sola vista.</div>
+        </div>
+      </div>
+      <div class="stack">
+        <label class="action primary" style="cursor:pointer">📄 Subir PDF<input id="pdfUpload" type="file" accept=".pdf,application/pdf" class="hidden"></label><button class="action" id="openPaste">✍️ Pegar lista</button>
+        <button class="action" id="openAddShop">🏪 Añadir tienda</button>
+        <button class="action soft" id="newList">🪄 Nueva lista</button>
+        <button class="action" id="exportBtn">⬇️ Respaldo</button>
+        <label class="action" style="cursor:pointer">⬆️ Recuperar<input id="importInput" type="file" accept=".json,application/json" class="hidden"></label>
+      </div>
+      <hr class="sep">
+      <div class="row">
+        <input id="searchInput" class="input" style="flex:1" placeholder="Buscar útil...">
+        <select id="filterState" class="select" style="width:180px">
+          <option value="all">Todos</option>
+          <option value="pending">Solo pendientes</option>
+          <option value="done">Ya completados</option>
+        </select>
+      </div>
+      <p class="helper" id="uploadStatus" role="status" aria-live="polite" style="margin:12px 0 0">Vista preparada con las 45 filas reales de tu PDF. Las 4 tiendas online son columnas, sin precios inventados.</p><p class="helper" style="margin:12px 0 0">Consejo: toca una tarjeta para editar estados, cantidades, precios y enlaces.</p>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Tiendas</div>
+        <div class="muted small">Empieza con cadenas online. Si quieres, agrega luego tu librería o casera real.</div>
+      </div>
+      <button class="action small" id="openAddShop2">+ Añadir</button>
+    </div>
+    <div id="shopsWrap" class="shop-list"></div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Tus útiles</div>
+        <div class="muted small">Lista compacta: toca la flecha de cualquier útil para ver sus tiendas.</div>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="action primary small" id="autoPrices">⌕ Buscar mejores precios</button>
+        <input id="quickItem" class="input" placeholder="Ej.: cuaderno cuadriculado" style="width:250px">
+        <input id="quickQty" class="input" type="number" min="1" step="1" value="1" style="width:96px">
+        <button class="action primary small" id="quickAdd">+ Añadir útil</button>
+      </div>
+    </div>
+    <p id="autoPricesStatus" class="helper" role="status" aria-live="polite">Los resultados online requieren el servidor y un proveedor conectado. No se inventan cotizaciones.</p>
+    <div id="itemsWrap" class="items"></div>
+  </section>
+
+  <footer>Guardado local · Revisa las cantidades indicadas como “c/u” y las filas con varios artículos</footer>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 class="modal-title" id="modalTitle">Modal</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+const STORE='mi_lista_escolar_preview_pdf_v3';
+const FAMILY_STORE='mi_lista_escolar_familia_v1';
+const FALLBACK_OLD='lista_escolar_motor_v1';
+const defaultShops=['Tai Loy','Metro','Tottus','Plaza Vea'];
+const domains={'Tai Loy':'tailoy.com.pe','Metro':'metro.pe','Tottus':'tottus.com.pe','Plaza Vea':'plazavea.com.pe'};
+const fakeExamples=['Mercadito Surquillo','Casera Av. Colonial','Mercado Callao'];
+const $=id=>document.getElementById(id);
+const uid=()=>crypto?.randomUUID?.()||String(Date.now()+Math.random());
+const money=n=>'S/ '+(Number(n||0).toFixed(2));
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const blank=()=>({name:'Mi lista escolar',shops:defaultShops.map((name,i)=>({id:'shop_'+i,name,visible:true,online:true})),items:[]});
+
+function migrate(data){
+  if(!data||typeof data!=='object')return blank();
+  let shops=Array.isArray(data.shops)?data.shops:[];
+  let items=Array.isArray(data.items)?data.items:[];
+  shops=shops.filter(s=>s&&typeof s.name==='string'&&!(fakeExamples.includes(s.name.trim())&&/^s[456]$/.test(s.id||'')));
+  if(!shops.length){shops=blank().shops}
+  items=items.map(i=>({
+    id: typeof i.id==='string'?i.id:uid(),
+    name: String(i.name||'').trim().slice(0,250),
+    qty: Math.max(1, parseInt(i.qty||1,10) || 1),
+    status: ['pending','have','bought'].includes(i.status)?i.status:'pending',
+    quotes: typeof i.quotes==='object'&&i.quotes?i.quotes:{}
+  })).filter(i=>i.name);
+  return {name:String(data.name||'Mi lista escolar').slice(0,120),shops,items};
+}
+
+function load(){
+  try{
+    const saved=localStorage.getItem(STORE);
+    if(saved) return migrate(JSON.parse(saved));
+    const older=localStorage.getItem(FALLBACK_OLD);
+    if(older) return migrate(JSON.parse(older));
+  }catch(e){}
+  return blank();
+}
+
+let state=localStorage.getItem(STORE)?load():{"name": "Lista de útiles — Segundo A", "shops": [{"id": "shop_0", "name": "Tai Loy", "visible": true, "online": true}, {"id": "shop_1", "name": "Metro", "visible": true, "online": true}, {"id": "shop_2", "name": "Tottus", "visible": true, "online": true}, {"id": "shop_3", "name": "Plaza Vea", "visible": true, "online": true}], "items": [{"id": "pdf_0", "name": "Bolsa de aseo", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_1", "name": "Alcohol en gel", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_2", "name": "Jabón líquido", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_3", "name": "Toalla", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_4", "name": "Protector solar", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_5", "name": "Desodorante", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_6", "name": "Polo de recambio de la institución", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_7", "name": "Paquete de toallas higiénicas (damas)", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_8", "name": "Tomatodo", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_9", "name": "Vaso plástico reusable", "qty": 1, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "01"}, {"id": "pdf_10", "name": "Rollos de papel toalla", "qty": 2, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "02"}, {"id": "pdf_11", "name": "Rollos de papel higiénico chico.", "qty": 2, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "02"}, {"id": "pdf_12", "name": "Rollos de papel higiénico industrial", "qty": 2, "status": "pending", "quotes": {}, "section": "Uso personal", "rawQty": "02"}, {"id": "pdf_13", "name": "Cuaderno cuadriculado tamaño A4 de 100 hojas forrado de color negro", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_14", "name": "Auriculares con micrófono, cableo con plus para computadora", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_15", "name": "Block de hojas rayadas", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_16", "name": "Juego de resaltadores de colores", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_17", "name": "Cuadernos cuadriculados tamaño A4 de 100 hojas forrado de color anaranjado (Resuelve problemas de cantidad), rojo (Resuelve problemas de regularidad, equivalencia y cambio), verde claro (Resuelve problemas de forma, movimiento y localización) y morado (Resuelve problemas de gestión de datos e incertidumbre)", "qty": 4, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "04"}, {"id": "pdf_18", "name": "Estuche de escuadras, regla 30 cm, transportador y compás", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01 c/u"}, {"id": "pdf_19", "name": "Cuaderno rayado tamaño A4 espiralado de 180 hojas o más forrado de color amarillo.", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_20", "name": "Diccionario de sinónimos y antónimos", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_21", "name": "Cuaderno de escritura Palmer 1 - 2", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_22", "name": "Cuaderno cuadriculado tamaño A4 de 100 hojas forrado de color verde", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_23", "name": "Mandil blanco de laboratorio", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_24", "name": "Tabla periódica", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_25", "name": "Cuaderno cuadriculado tamaño A4 de 100 hojas forrado de color crema", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_26", "name": "Cuaderno cuadriculado tamaño A4 de 100 hojas forrado de color fucsia.", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_27", "name": "Cuaderno cuadriculado tamaño A4 de 100 hojas forrado de color celeste", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_28", "name": "Biblia Latinoamericana", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_29", "name": "Lápiz, borrador, tajador, pegamento en barra, corrector líquido, tijera, lapiceros de colores, caja de colores, estuche de plumones y candado para el casillero y Puerto USB de 16 GB", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01 c/u"}, {"id": "pdf_30", "name": "Pionner negro lomo ancho tamaño A4 de dos anillos para tareas y evaluaciones.", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01 c/u"}, {"id": "pdf_31", "name": "Cuaderno cuadriculado color marrón de 100 hojas Folder de pasta dura marrón 1 limpia tipo Una mica para fotocheck 1 block de hojas de color A-4 1 USB", "qty": 1, "status": "pending", "quotes": {}, "section": "Útiles académicos", "rawQty": "01"}, {"id": "pdf_32", "name": "Caja de alfileres / Cinta de embalaje transparente/ Cinta masking tape gruesa", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01 c/u"}, {"id": "pdf_33", "name": "Block de hojas de colores A4.", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_34", "name": "Block de cartulinas de colores A3 de colores", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_35", "name": "Pomo de silicona líquida 250 ml", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_36", "name": "Paquete de micas A4", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_37", "name": "Cartulinas granuladas: Se sugiere rojo, azul, amarillo, verde, marrón y melón, sin envolver", "qty": 6, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "06"}, {"id": "pdf_38", "name": "Millar de hojas de papel bond A4 - 80 gramos.", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_39", "name": "Plumones gruesos (negros, rojo, azul)", "qty": 3, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "03"}, {"id": "pdf_40", "name": "Cinta Maskintg pape de color rojo, azul, amarillo, verde", "qty": 4, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "04"}, {"id": "pdf_41", "name": "Microporoso escarchado: dorado, rojo, azul, verde, platinado", "qty": 2, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "02"}, {"id": "pdf_42", "name": "Pliego de papel kraft", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}, {"id": "pdf_43", "name": "Plumones de pizarra gruesos rojo, azul, verde y negro (2 c/uno.)", "qty": 8, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "08"}, {"id": "pdf_44", "name": "Caja de alfileres", "qty": 1, "status": "pending", "quotes": {}, "section": "Tutoría", "rawQty": "01"}]};
+let family;
+try { family=JSON.parse(localStorage.getItem(FAMILY_STORE)); } catch(e) {}
+if(!family || !Array.isArray(family.lists) || !family.lists.length){
+ family={active:'first',lists:[{id:'first',child:'Mi hijo/a',year:'2026',grade:'2.º secundaria',data:state}]};
+}
+family.lists=family.lists.filter(l=>l&&l.data&&Array.isArray(l.data.items)&&Array.isArray(l.data.shops));
+if(!family.lists.length)family={active:'first',lists:[{id:'first',child:'Mi hijo/a',year:'2026',grade:'',data:state}]};
+let activeEntry=family.lists.find(l=>l.id===family.active)||family.lists[0];family.active=activeEntry.id;state=activeEntry.data;
+function save(){activeEntry.data=state;localStorage.setItem(STORE,JSON.stringify(state));localStorage.setItem(FAMILY_STORE,JSON.stringify(family));}
+function switchList(id){save();activeEntry=family.lists.find(l=>l.id===id)||activeEntry;family.active=activeEntry.id;state=activeEntry.data;save();render();}
+function familyRender(){
+ const target=$('familyTabs');if(!target)return;
+ target.innerHTML=family.lists.map(l=>`<button class="action small ${l.id===family.active?'primary':''}" data-listid="${esc(l.id)}">${esc(l.child)} · ${esc(l.year)}${l.grade?' · '+esc(l.grade):''}</button>`).join('');
+ target.querySelectorAll('[data-listid]').forEach(b=>b.onclick=()=>switchList(b.dataset.listid));
+}
+function normalizeName(v){return String(v||'').toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
+function familyPurchases(){
+ let entries=new Map();
+ for(let l of family.lists){for(let i of l.data.items){if(i.status!=='pending')continue;let key=normalizeName(i.name);let e=entries.get(key)||{name:i.name,qty:0,children:[],quotes:[]};e.qty+=i.qty;e.children.push(l.child+' ('+i.qty+')');for(let sh of l.data.shops){let q=i.quotes?.[sh.id];if(Number.isFinite(q?.price)&&q.price>=0)e.quotes.push({shop:sh.name,price:q.price,source:q.source||'Manual',url:q.url||''});}entries.set(key,e)}}
+ let rows=[...entries.values()];let stores=[...new Set(rows.flatMap(i=>i.quotes.map(q=>q.shop)))];let result=stores.map(shop=>{let amount=0,found=0;for(let i of rows){let vals=i.quotes.filter(q=>q.shop===shop).map(q=>q.price);if(vals.length){amount+=Math.min(...vals)*i.qty;found++}}return {shop,amount,found,total:rows.length}}).sort((a,b)=>b.found-a.found||a.amount-b.amount);
+ let mixed=0,quoted=0;for(let i of rows){if(i.quotes.length){mixed+=Math.min(...i.quotes.map(q=>q.price))*i.qty;quoted++}}
+ return {rows,result,mixed,quoted};
+}
+function renderFamilySummary(){let r=familyPurchases();let el=$('familyResults');el.classList.remove('hidden');el.innerHTML=`<h3>Compra de toda la familia</h3><p class="muted small">${r.rows.length} artículos distintos pendientes. Las cantidades iguales se suman, pero productos con diferentes especificaciones se mantienen separados.</p><div class="stat"><div class="label">Combinando precios mínimos conocidos</div><div class="value">${money(r.mixed)}${r.quoted<r.rows.length?' +':''}</div><div class="helper">${r.quoted}/${r.rows.length} productos cotizados; no incluye envíos.</div></div><div style="overflow:auto"><table style="width:100%;text-align:left;border-collapse:collapse"><thead><tr><th>Tienda</th><th>Cobertura</th><th>Subtotal conocido</th></tr></thead><tbody>${r.result.map(x=>`<tr><td>${esc(x.shop)}</td><td>${x.found}/${x.total}</td><td>${money(x.amount)}${x.found<x.total?' +':''}</td></tr>`).join('')}</tbody></table></div><p class="helper">No compares subtotales de distinta cobertura como si fueran totales completos. Antes de fusionar productos, confirma marca, tamaño y presentación.</p><button class="action small" id="hideFamily">Cerrar</button>`; $('hideFamily').onclick=()=>el.classList.add('hidden');}
+function sharePriceFile(){let quotes=[];for(let l of family.lists){for(let i of l.data.items){for(let sh of l.data.shops){let q=i.quotes?.[sh.id];if(Number.isFinite(q?.price)&&q.price>=0)quotes.push({product:i.name,shop:sh.name,price:q.price,url:q.url||'',updatedAt:q.updatedAt||new Date().toISOString(),source:'Precio compartido por familiar'})}}}download('precios_familiares.json',JSON.stringify({type:'school-price-share',version:1,quotes},null,2),'application/json')}
+function importFamilyPrices(obj){if(obj?.type!=='school-price-share'||!Array.isArray(obj.quotes)||obj.quotes.length>10000)throw Error('Archivo de precios no válido');let matched=0;for(let q of obj.quotes){if(typeof q.shop!=='string'||typeof q.product!=='string'||!Number.isFinite(q.price)||q.price<0||q.price>100000||q.product.length>250||q.shop.length>100)continue;for(let l of family.lists){let item=l.data.items.find(i=>normalizeName(i.name)===normalizeName(q.product));if(!item)continue;let shop=l.data.shops.find(s=>normalizeName(s.name)===normalizeName(q.shop));if(!shop){shop={id:uid(),name:q.shop,online:false,visible:true};l.data.shops.push(shop)}let prior=item.quotes?.[shop.id];if(!item.quotes)item.quotes={};if(!Number.isFinite(prior?.price)||q.price<prior.price){item.quotes[shop.id]={price:q.price,url:/^https:\/\//.test(q.url||'')?q.url:'',updatedAt:q.updatedAt,source:q.source||'Compartido'};matched++}}}return matched;}
+
+function best(item){
+  const vals=Object.values(item.quotes||{}).map(q=>q?.price).filter(v=>typeof v==='number' && isFinite(v) && v>=0);
+  return vals.length?Math.min(...vals):null;
+}
+function totals(){
+  const totalItems=state.items.length;
+  const doneItems=state.items.filter(i=>i.status!=='pending').length;
+  let estimated=0, missing=0;
+  state.items.forEach(i=>{
+    const b=best(i);
+    if(b!==null){
+      estimated += b*i.qty;
+      if(i.status==='pending') missing += b*i.qty;
+    }
+  });
+  return {totalItems,doneItems,estimated,missing,pct:totalItems?Math.round((doneItems/totalItems)*100):0};
+}
+function stateLabel(status){return status==='have'?'Ya lo tengo':status==='bought'?'Ya lo compré':'Me falta';}
+function stateClass(status){return status==='have'?'state-have':status==='bought'?'state-bought':'state-pending';}
+function searchUrl(product,shop){
+  const q=encodeURIComponent(product);
+  if(shop.online && domains[shop.name]) return 'https://www.google.com/search?q=site:'+encodeURIComponent(domains[shop.name])+'+'+q;
+  return 'https://www.google.com/search?q='+encodeURIComponent(shop.name+' '+product);
+}
+
+function shopLogo(shop){
+ const domain=domains[shop.name];
+ return domain?`<img class="shop-logo" src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="shop-symbol">${esc((shop.name||'?').trim().charAt(0).toUpperCase())}</span>`;
+}
+function render(){
+  const expandedIds=new Set([...document.querySelectorAll('.item-card.expanded')].map(el=>el.dataset.itemCard));
+  save();
+  familyRender();
+  $('listName').value=state.name;
+  const t=totals();
+  $('pct').textContent=t.pct+'%';
+  $('doneCount').textContent=t.doneItems+'/'+t.totalItems;
+  $('remaining').textContent=money(t.missing);
+  $('total').textContent=money(t.estimated);
+  $('shopsCount').textContent=String(state.shops.filter(s=>s.visible).length);
+  $('meterFill').style.width=t.pct+'%';
+  $('ring').style.setProperty('--value',t.pct);
+
+  $('shopsWrap').innerHTML = state.shops.length ? state.shops.map(shop=>`
+    <div class="shop-pill">
+      <input type="checkbox" ${shop.visible?'checked':''} data-toggle-shop="${esc(shop.id)}">
+      ${shopLogo(shop)}<span>${esc(shop.name)}</span>
+      <button class="icon-btn" data-edit-shop="${esc(shop.id)}" title="Editar">✎</button>
+    </div>`).join('') : `<div class="empty">Todavía no has añadido tiendas.</div>`;
+
+  const q=$('searchInput').value.trim().toLowerCase();
+  const mode=$('filterState').value;
+  const visibleShops=state.shops.filter(s=>s.visible);
+  let items=state.items.filter(item=>{
+    const matchesText=item.name.toLowerCase().includes(q);
+    const matchesState=mode==='all' ? true : mode==='pending' ? item.status==='pending' : item.status!=='pending';
+    return matchesText && matchesState;
+  });
+
+  $('itemsWrap').innerHTML = items.length ? items.map(item=>{
+    const b=best(item);
+    const complete=item.status!=='pending';
+    return `<article class="item-card" data-item-card="${esc(item.id)}">
+      <div class="compact-row">
+        <input class="compact-check" type="checkbox" data-quick-done="${esc(item.id)}" ${complete?'checked':''} aria-label="Marcar ${esc(item.name)} como ${complete?'pendiente':'disponible'}">
+        <div><div class="compact-title" style="${complete?'text-decoration:line-through;opacity:.65':''}">${esc(item.name)}</div><div class="compact-sub">${esc(item.section||'')} · ${item.qty} unid. · ${stateLabel(item.status)}</div></div>
+        <div class="compact-cost">${b===null?'Sin precio':money(b)}</div>
+        <button class="compact-expand" data-toggle-item="${esc(item.id)}" title="Ver tiendas y editar" aria-label="Ver tiendas de ${esc(item.name)}">⌄</button>
+      </div>
+      <div class="compact-detail">
+        <div class="compact-details-grid">
+          <select class="select compact-input" data-status="${esc(item.id)}"><option value="pending" ${item.status==='pending'?'selected':''}>Me falta</option><option value="have" ${item.status==='have'?'selected':''}>Ya lo tengo</option><option value="bought" ${item.status==='bought'?'selected':''}>Ya lo compré</option></select>
+          <input class="input compact-input" type="number" min="1" step="1" value="${item.qty}" data-qty="${esc(item.id)}" aria-label="Cantidad">
+        </div>
+        ${visibleShops.length?visibleShops.map(shop=>{
+          const quote=item.quotes?.[shop.id]||{};
+          return `<div class="shop-price-line">
+            <div class="shop-identity">${shopLogo(shop)}<span>${esc(shop.name)}</span></div>
+            <input class="input compact-input" type="number" min="0" step="0.01" placeholder="S/" value="${typeof quote.price==='number'?quote.price:''}" data-price-item="${esc(item.id)}" data-price-shop="${esc(shop.id)}" aria-label="Precio ${esc(shop.name)}">
+            <input class="input compact-input" type="url" placeholder="Enlace" value="${esc(quote.url||'')}" data-url-item="${esc(item.id)}" data-url-shop="${esc(shop.id)}" aria-label="Enlace ${esc(shop.name)}">
+            <a class="compact-link" href="${searchUrl(item.name,shop)}" target="_blank" rel="noopener noreferrer" title="Buscar en ${esc(shop.name)}">↗</a>
+          </div>`;
+        }).join(''):'<div class="empty">Activa una tienda para comparar.</div>'}
+        <div class="item-actions"><button class="action small" data-rename-item="${esc(item.id)}">Editar</button><button class="action small" data-copy-item="${esc(item.id)}">Duplicar</button><button class="action small" data-delete-item="${esc(item.id)}">Eliminar</button></div>
+      </div>
+    </article>`;
+  }).join('') : `<div class="empty">No hay útiles en esta vista. Puedes añadirlos arriba.</div>`;
+
+  bindEvents();
+  document.querySelectorAll('[data-item-card]').forEach(el=>{
+    if(expandedIds.has(el.dataset.itemCard)){el.classList.add('expanded');el.querySelector('[data-toggle-item]').textContent='⌃';}
+  });
+}
+
+function bindEvents(){
+  document.querySelectorAll('[data-toggle-item]').forEach(el=>el.onclick=()=>{
+    const card=el.closest('.item-card');const was=card.classList.contains('expanded');
+    card.classList.toggle('expanded',!was);el.textContent=was?'⌄':'⌃';
+  });
+  document.querySelectorAll('[data-quick-done]').forEach(el=>el.onchange=()=>{
+    const item=state.items.find(x=>x.id===el.dataset.quickDone);
+    if(item){item.status=el.checked?'have':'pending';render();}
+  });
+  document.querySelectorAll('[data-toggle-shop]').forEach(el=>el.onchange=()=>{const s=state.shops.find(x=>x.id===el.dataset.toggleShop); if(s){s.visible=el.checked; render();}});
+  document.querySelectorAll('[data-edit-shop]').forEach(el=>el.onclick=()=>openShopModal(el.dataset.editShop));
+  document.querySelectorAll('[data-status]').forEach(el=>el.onchange=()=>{const item=state.items.find(x=>x.id===el.dataset.status); if(item){item.status=el.value; render();}});
+  document.querySelectorAll('[data-qty]').forEach(el=>el.onchange=()=>{const item=state.items.find(x=>x.id===el.dataset.qty); if(item){item.qty=Math.max(1,parseInt(el.value||1,10)||1); render();}});
+  document.querySelectorAll('[data-price-item]').forEach(el=>el.onchange=()=>{const item=state.items.find(x=>x.id===el.dataset.priceItem); if(!item) return; const shopId=el.dataset.priceShop; item.quotes[shopId]=item.quotes[shopId]||{}; const val=el.value===''?null:parseFloat(el.value); if(val===null || !isFinite(val)){delete item.quotes[shopId].price;} else {item.quotes[shopId].price=Math.max(0,val);} render();});
+  document.querySelectorAll('[data-url-item]').forEach(el=>el.onchange=()=>{const item=state.items.find(x=>x.id===el.dataset.urlItem); if(!item) return; const shopId=el.dataset.urlShop; item.quotes[shopId]=item.quotes[shopId]||{}; item.quotes[shopId].url=el.value.trim(); save();});
+  document.querySelectorAll('[data-delete-item]').forEach(el=>el.onclick=()=>{const idx=state.items.findIndex(x=>x.id===el.dataset.deleteItem); if(idx>-1 && confirm('¿Eliminar este útil?')){state.items.splice(idx,1); render();}});
+  document.querySelectorAll('[data-copy-item]').forEach(el=>el.onclick=()=>{const item=state.items.find(x=>x.id===el.dataset.copyItem); if(item){const copy=JSON.parse(JSON.stringify(item)); copy.id=uid(); copy.name += ' (copia)'; state.items.push(copy); render();}});
+  document.querySelectorAll('[data-rename-item]').forEach(el=>el.onclick=()=>{const item=state.items.find(x=>x.id===el.dataset.renameItem); if(!item) return; const name=prompt('Nuevo nombre del útil:', item.name); if(name && name.trim()){item.name=name.trim().slice(0,250); render();}});
+}
+
+function addItem(name,qty=1){
+  const n=String(name||'').trim();
+  if(!n) return false;
+  state.items.push({id:uid(),name:n.slice(0,250),qty:Math.max(1,parseInt(qty||1,10)||1),status:'pending',quotes:{}});
+  render();
+  return true;
+}
+
+function parseList(text){
+  return String(text||'').split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>{
+    let m=line.match(/^(\d+)\s*[xX-]\s*(.+)$/) || line.match(/^(.+?)\s*[xX]\s*(\d+)$/);
+    if(m){
+      if(/^\d+$/.test(m[1])) return {qty:parseInt(m[1],10), name:m[2].trim()};
+      return {qty:parseInt(m[2],10), name:m[1].trim()};
+    }
+    return {qty:1,name:line};
+  }).filter(x=>x.name);
+}
+
+function download(filename,content,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+
+function openModal(title,bodyHTML,buttons=[]){
+  $('modalTitle').textContent=title;
+  $('modalBody').innerHTML=bodyHTML;
+  $('modalActions').innerHTML='';
+  buttons.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='action'+(b.primary?' primary':'');
+    btn.textContent=b.label;
+    btn.onclick=b.onClick;
+    $('modalActions').appendChild(btn);
+  });
+  $('modalBg').style.display='flex';
+}
+function closeModal(){$('modalBg').style.display='none';}
+$('modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+function openPasteModal(){
+  openModal('Pegar o escribir lista', `
+    <p class="muted small">Escribe un útil por línea. También puedes usar formatos como <strong>2 x cuaderno</strong>.</p>
+    <textarea id="pasteArea" class="textarea" rows="10" placeholder="2 x cuaderno cuadriculado\n1 x cartuchera\n12 x lápiz negro"></textarea>
+  `,[
+    {label:'Cancelar',onClick:closeModal},
+    {label:'Añadir a mi lista',primary:true,onClick:()=>{
+      const rows=parseList($('pasteArea').value);
+      if(!rows.length){alert('No encontré útiles para añadir.'); return;}
+      rows.forEach(r=>addItem(r.name,r.qty));
+      closeModal();
+    }}
+  ]);
+}
+
+function openShopModal(id=null){
+  const shop=id ? state.shops.find(s=>s.id===id) : null;
+  openModal(shop?'Editar tienda':'Añadir tienda', `
+    <label class="small muted">Nombre</label>
+    <input id="shopNameField" class="input" value="${esc(shop?.name||'')}" placeholder="Ej.: Librería Central">
+    <div style="height:10px"></div>
+    <label class="small muted">Tipo</label>
+    <select id="shopOnlineField" class="select">
+      <option value="true" ${shop?.online!==false?'selected':''}>Tienda online</option>
+      <option value="false" ${shop?.online===false?'selected':''}>Tienda local</option>
+    </select>
+    <div style="height:10px"></div>
+    <label class="small muted"><input id="shopVisibleField" type="checkbox" ${shop?.visible!==false?'checked':''}> Mostrar en comparación</label>
+  `,[
+    ...(shop?[{label:'Eliminar',onClick:()=>{
+      if(!confirm('¿Eliminar esta tienda?')) return;
+      state.shops=state.shops.filter(s=>s.id!==shop.id);
+      state.items.forEach(item=>{delete item.quotes[shop.id];});
+      closeModal(); render();
+    }}]:[]),
+    {label:'Cancelar',onClick:closeModal},
+    {label:shop?'Guardar cambios':'Añadir tienda',primary:true,onClick:()=>{
+      const name=$('shopNameField').value.trim();
+      if(!name){alert('Escribe un nombre para la tienda.'); return;}
+      if(shop){
+        shop.name=name.slice(0,100);
+        shop.online=$('shopOnlineField').value==='true';
+        shop.visible=$('shopVisibleField').checked;
+      }else{
+        state.shops.push({id:uid(),name:name.slice(0,100),online:$('shopOnlineField').value==='true',visible:$('shopVisibleField').checked});
+      }
+      closeModal(); render();
+    }}
+  ]);
+}
+
+$('listName').addEventListener('input',e=>{state.name=e.target.value.slice(0,120); save();});
+$('searchInput').addEventListener('input',render);
+$('filterState').addEventListener('change',render);
+$('openPaste').onclick=openPasteModal;
+$('openAddShop').onclick=()=>openShopModal();
+$('openAddShop2').onclick=()=>openShopModal();
+$('newList').onclick=()=>{if(confirm('¿Vaciar únicamente la lista seleccionada?')){state=blank(); render();}};
+$('quickAdd').onclick=()=>{
+  const ok=addItem($('quickItem').value,$('quickQty').value);
+  if(ok){$('quickItem').value='';$('quickQty').value='1';$('quickItem').focus();}
+  else alert('Escribe el nombre del útil.');
+};
+$('quickItem').addEventListener('keydown',e=>{if(e.key==='Enter')$('quickAdd').click();});
+$('exportBtn').onclick=()=>download('mi_lista_escolar.json',JSON.stringify(state,null,2),'application/json');
+$('addChildList').onclick=()=>{let child=prompt('Nombre del hijo o hija:');if(!child?.trim())return;let year=prompt('Año escolar:','2027');if(!year?.trim())return;let grade=prompt('Grado (opcional):','')||'';save();let l={id:uid(),child:child.trim().slice(0,70),year:year.trim().slice(0,10),grade:grade.trim().slice(0,50),data:blank()};family.lists.push(l);switchList(l.id)};
+$('familySummary').onclick=renderFamilySummary;
+$('sharePrices').onclick=sharePriceFile;
+$('importPrices').onchange=async e=>{let f=e.target.files?.[0];if(!f)return;try{let obj=JSON.parse(await f.text());let n=importFamilyPrices(obj);save();render();alert('Se incorporaron '+n+' cotizaciones coincidentes. Revisa marcas y presentaciones.')}catch(err){alert(err.message)}e.target.value=''};
+$('importInput').onchange=async e=>{
+  const f=e.target.files?.[0];
+  if(!f) return;
+  try{
+    const obj=JSON.parse(await f.text());
+    state=migrate(obj.data||obj);
+    render();
+    alert('Respaldo recuperado.');
+  }catch(err){alert('No pude leer ese respaldo.');}
+  e.target.value='';
+};
+
+
+function reviewStructured(items,notes=[]){
+  let html = `<p class="muted small">Encontré <b>${items.length}</b> filas de útiles. Puedes corregir cada nombre y cantidad o desmarcar una fila. Los encabezados y notas se excluyen.</p><div style="max-height:52vh;overflow:auto">`;
+  let last='';
+  items.forEach((r,i)=>{
+    if(r.section!==last){last=r.section;html+=`<h4 style="margin:15px 0 8px">${esc(last)}</h4>`;}
+    html+=`<div style="display:grid;grid-template-columns:24px 68px minmax(0,1fr);gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="recCheck${i}" checked aria-label="Incluir fila ${i+1}"><input id="recQty${i}" class="input" style="padding:9px" type="number" min="1" value="${Number(r.qty)||1}" aria-label="Cantidad fila ${i+1}"><input id="recName${i}" class="input" style="padding:9px" value="${esc(r.name)}" aria-label="Artículo fila ${i+1}"></div>`;
+    if(r.review)html+=`<p class="helper" style="margin:0 0 6px 32px;color:#9b6712">Revisar cantidad original: ${esc(r.rawQty)}. Esta fila agrupa varios productos.</p>`;
+  });
+  html+='</div>';
+  if(notes.length)html+=`<p class="helper">${notes.length} indicación(es) del colegio excluidas de la compra.</p>`;
+  openModal('Revisar útiles detectados',html,[
+     {label:'Cancelar',onClick:closeModal},
+     {label:'Añadir seleccionados',primary:true,onClick:()=>{
+       let count=0;
+       items.forEach((r,i)=>{
+        if(!$('recCheck'+i).checked)return;
+        const name=$('recName'+i).value.trim(),qty=Number($('recQty'+i).value);
+        if(!name||!Number.isInteger(qty)||qty<1)return;
+        state.items.push({id:uid(),name:name.slice(0,250),qty,status:'pending',quotes:{},section:r.section,rawQty:r.rawQty});count++;
+       });
+       closeModal();render();$('uploadStatus').textContent=count+' artículos añadidos. Comprueba las filas que contienen varios útiles.';
+     }}
+  ]);
+}
+
+$('pdfUpload').onchange=async e=>{
+ const f=e.target.files?.[0];if(!f)return;
+ const status=$('uploadStatus');status.textContent='Leyendo '+f.name+'…';
+ try{
+  if(f.size>30*1024*1024)throw Error('El archivo supera 30 MB');
+  const form=new FormData();form.append('file',f,f.name);
+  const rsp=await fetch('/api/extract',{method:'POST',body:form});
+  if(!rsp.ok){let obj=await rsp.json().catch(()=>({}));throw Error(obj.error||'No fue posible leer el PDF');}
+  const result=await rsp.json();
+  if(!result.structured||!result.items?.length)throw Error('No se detectaron tablas estructuradas. Este PDF necesita revisión manual.');
+  status.textContent='Se detectaron '+result.items.length+' filas en '+result.sections.length+' secciones. Revisa antes de importar.';
+  reviewStructured(result.items,result.notes||[]);
+ }catch(err){status.textContent='No se importó: '+err.message+' · Este HTML debe abrirse desde la aplicación web, no desde el visor de archivos del teléfono.';}
+ e.target.value='';
+};
+
+
+// Búsqueda online: muestra resultados para confirmación, sin sobrescribir precios actuales.
+$('autoPrices').onclick=async()=>{
+ const button=$('autoPrices'),status=$('autoPricesStatus');
+ const pending=state.items.filter(i=>i.status==='pending'&&i.name.trim().length>=3).slice(0,75);
+ if(!pending.length){status.textContent='No hay artículos pendientes para buscar.';return}
+ const proposals=[];let empty=0;
+ button.disabled=true;
+ try{
+  for(let idx=0;idx<pending.length;idx++){
+   const item=pending[idx];status.textContent=`Buscando ${idx+1} de ${pending.length}: ${item.name}`;
+   let response;
+   try{response=await fetch('/api/prices',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product:item.name})});}
+   catch(_){throw Error('Esta copia HTML necesita abrirse desde el servidor web de Mi Lista Escolar para consultar precios.')} 
+   let result=await response.json().catch(()=>({}));
+   if(!response.ok)throw Error(result.error||'Proveedor de cotizaciones no disponible');
+   if(!result.configured)throw Error(result.message||'Falta configurar el proveedor online');
+   if(!Array.isArray(result.quotes)||!result.quotes.length){empty++;continue}
+   for(const q of result.quotes){
+    let shop=state.shops.find(sh=>sh.name.toLowerCase()===String(q.shop).toLowerCase());
+    if(!shop||!Number.isFinite(q.price)||q.price<=0||!/^https:\/\//.test(q.url||''))continue;
+    proposals.push({itemId:item.id,itemName:item.name,shopId:shop.id,shopName:shop.name,price:q.price,title:q.title,url:q.url});
+   }
+  }
+  if(!proposals.length){status.textContent=`No se encontraron coincidencias verificables (${empty} artículos sin ofertas). Puedes importar precios de familiares o añadirlos manualmente.`;return}
+  const groups=proposals.map((q,i)=>`<label style="display:grid;grid-template-columns:22px 1fr;gap:10px;margin:10px 0;padding:10px;border:1px solid #dde4ea;border-radius:12px"><input type="checkbox" id="priceConfirm${i}" checked><span><b>${esc(q.itemName)}</b> · ${esc(q.shopName)} · <b>${money(q.price)}</b><br><span class="helper">${esc(q.title)}</span><br><a href="${esc(q.url)}" rel="noopener noreferrer" target="_blank">Comprobar en tienda ↗</a></span></label>`).join('');
+  openModal('Revisar precios encontrados',`<p class="helper">${proposals.length} cotizaciones para ${pending.length} artículos consultados. Antes de aceptar comprueba marca, presentación, cantidad y fecha. No se reemplazan precios manuales ni compartidos.</p><div style="max-height:53vh;overflow:auto">${groups}</div>`,[
+   {label:'Cancelar',onClick:closeModal},
+   {label:'Guardar seleccionados',primary:true,onClick:()=>{
+    let count=0;
+    proposals.forEach((p,i)=>{
+     if(!$('priceConfirm'+i)?.checked)return;
+     const item=state.items.find(x=>x.id===p.itemId);if(!item)return;
+     const previous=item.quotes?.[p.shopId];
+     if(Number.isFinite(previous?.price))return; // conservative: do not overwrite
+     item.quotes=item.quotes||{};
+     item.quotes[p.shopId]={price:p.price,url:p.url,source:'Cotización online',updatedAt:new Date().toISOString(),title:p.title};count++;
+    });
+    closeModal();render();$('autoPricesStatus').textContent=`${count} cotizaciones nuevas guardadas. ${empty} artículos no tuvieron resultados.`;
+   }}
+  ]);
+  status.textContent=`${proposals.length} coincidencias propuestas. Confirma los precios y productos.`;
+ }catch(err){status.textContent='Búsqueda no completada: '+err.message;}
+ finally{button.disabled=false;}
+};
+
+render();
+</script>
+
+<style>
+#betaUser{position:fixed;inset:0;z-index:500;background:#20352bc9;display:none;align-items:center;justify-content:center;padding:16px}
+#betaUser .join{width:min(420px,100%);background:#eef3e9;border-radius:24px;padding:25px;box-shadow:0 18px 80px #15221955;color:#20352b}
+#betaUser input{width:100%;padding:13px;margin-top:9px;border:1px solid #c6d3c4;border-radius:13px;background:#fff}
+#betaUser button{margin-top:16px;width:100%;padding:14px;background:#2d654f;border:0;color:#fff;border-radius:13px;font-weight:700}
+.beta-dot{font-size:12px;color:#517865}
+</style>
+<div id="betaUser" role="dialog" aria-modal="true" aria-label="Bienvenido a Mi Lista Escolar"><form class="join" id="betaRegister"><div class="beta-dot">MI LISTA ESCOLAR · BETA</div><h2>Tu lista, más fácil.</h2><p>Ingresa tus datos una sola vez. Podrás organizar útiles y comparar cotizaciones de tu familia.</p><label>Nombre<input id="betaName" autocomplete="name" required minlength="2" maxlength="80" placeholder="Tu nombre"></label><label>Correo<input id="betaEmail" type="email" autocomplete="email" required placeholder="tu@correo.com"></label><button type="submit">Empezar →</button><p style="font-size:12px;color:#637669">Tus datos se guardan en este dispositivo. No se crean cuentas externas ni se envían estos datos a Bright Data.</p></form></div>
+<script>
+(function(){
+ const key='mle_beta_profile_1',layer=document.getElementById('betaUser');
+ if(!localStorage.getItem(key)) layer.style.display='flex';
+ document.getElementById('betaRegister').addEventListener('submit',function(e){
+   e.preventDefault();const name=document.getElementById('betaName').value.trim();const email=document.getElementById('betaEmail').value.trim();
+   if(name.length<2 || !document.getElementById('betaEmail').validity.valid)return;
+   try{localStorage.setItem(key,JSON.stringify({name,email,createdAt:new Date().toISOString()}));layer.style.display='none'}catch(e){alert('No se pudieron guardar los datos en este navegador.')}
+ });
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
